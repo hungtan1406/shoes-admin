@@ -4,32 +4,18 @@ const upload = require('../middleware/uploadMiddleware'); // Import middleware f
 // Get all products
 const getAllProducts = async (req, res) => {
   try {
-    const {
-      category,
-      brand,
-      sortBy = 'name',
-      order = 'asc',
-      page = 1,
-      limit = 10,
-    } = req.query;
+    const products = await Product.find();
 
-    const query = {};
-    if (category) query.category = category;
-    if (brand) query.brand = brand;
+    // Format price to VNĐ
+    const formattedProducts = products.map((product) => ({
+      ...product._doc,
+      price: new Intl.NumberFormat('vi-VN', {
+        style: 'currency',
+        currency: 'VND',
+      }).format(product.price),
+    }));
 
-    const products = await Product.find(query)
-      .sort({ [sortBy]: order === 'asc' ? 1 : -1 })
-      .limit(limit * 1)
-      .skip((page - 1) * limit)
-      .exec();
-
-    const count = await Product.countDocuments(query);
-
-    res.status(200).json({
-      products,
-      totalPages: Math.ceil(count / limit),
-      currentPage: page,
-    });
+    res.status(200).json({ products: formattedProducts });
   } catch (error) {
     res.status(500).json({ message: 'Error fetching products', error });
   }
@@ -121,12 +107,10 @@ const updateProduct = async (req, res) => {
     if (!updatedProduct)
       return res.status(404).json({ message: 'Product not found' });
 
-    res
-      .status(200)
-      .json({
-        message: 'Product updated successfully',
-        product: updatedProduct,
-      });
+    res.status(200).json({
+      message: 'Product updated successfully',
+      product: updatedProduct,
+    });
   } catch (error) {
     console.error('Error updating product:', error);
     res

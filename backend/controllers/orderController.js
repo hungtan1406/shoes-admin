@@ -5,10 +5,26 @@ const Order = require('../models/Order');
 const getAllOrders = async (req, res) => {
   try {
     const orders = await Order.find()
-      .populate('customer', 'name email phone address') // Populate customer details
-      .populate('orderItems.product', 'name price'); // Populate product details
-    console.log(orders);
-    res.status(200).json(orders);
+      .populate('customer', 'name email phone address')
+      .populate('orderItems.product', 'name price');
+
+    // Format totalAmount and price to VNĐ
+    const formattedOrders = orders.map((order) => ({
+      ...order._doc,
+      totalAmount: new Intl.NumberFormat('vi-VN', {
+        style: 'currency',
+        currency: 'VND',
+      }).format(order.totalAmount),
+      orderItems: order.orderItems.map((item) => ({
+        ...item._doc,
+        price: new Intl.NumberFormat('vi-VN', {
+          style: 'currency',
+          currency: 'VND',
+        }).format(item.price),
+      })),
+    }));
+
+    res.status(200).json(formattedOrders);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching orders', error });
   }
@@ -98,7 +114,10 @@ const getDashboardMetrics = async (req, res) => {
 
     res.status(200).json({
       totalOrders,
-      totalRevenue: totalRevenue[0]?.total || 0,
+      totalRevenue: new Intl.NumberFormat('vi-VN', {
+        style: 'currency',
+        currency: 'VND',
+      }).format(totalRevenue[0]?.total || 0),
       totalCustomers,
     });
   } catch (error) {

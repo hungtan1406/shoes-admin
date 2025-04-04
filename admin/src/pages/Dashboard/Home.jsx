@@ -67,9 +67,7 @@ const Home = () => {
               </div>
               <div className='bg-white p-4 rounded-lg shadow-md'>
                 <h3 className='text-lg font-bold'>Total Revenue</h3>
-                <p className='text-2xl font-semibold'>
-                  {metrics.totalRevenue.toFixed(2)}
-                </p>
+                <p className='text-2xl font-semibold'>{metrics.totalRevenue}</p>
               </div>
               <div className='bg-white p-4 rounded-lg shadow-md'>
                 <h3 className='text-lg font-bold'>Total Customers</h3>
