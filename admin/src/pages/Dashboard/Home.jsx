@@ -100,7 +100,10 @@ const Home = () => {
                           {order.customer?.name || 'N/A'}
                         </td>
                         <td className='px-4 py-2 border'>
-                          {order.totalAmount}
+                          {new Intl.NumberFormat('vi-VN', {
+                            style: 'currency',
+                            currency: 'VND',
+                          }).format(order.totalAmount)}
                         </td>
                         <td className='px-4 py-2 border'>{order.status}</td>
                         <td className='px-4 py-2 border'>

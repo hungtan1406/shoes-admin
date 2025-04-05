@@ -73,12 +73,12 @@ const Login = () => {
           <button type='submit' className='btn-primary'>
             LOGIN
           </button>
-          <p className='text-[13px] text-slate-700 mt-3'>
+          {/* <p className='text-[13px] text-slate-700 mt-3'>
             Don't have an account?{' '}
             <Link className='font-medium text-primary underline' to='/signup'>
               Sign Up
             </Link>
-          </p>
+          </p> */}
         </form>
       </div>
     </AuthLayout>

@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import { FiCamera, FiXCircle, FiEdit, FiTrash } from 'react-icons/fi';
 
 const List = () => {
   const [products, setProducts] = useState([]);
@@ -19,6 +20,8 @@ const List = () => {
     description: '',
     images: [],
   });
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -58,8 +61,38 @@ const List = () => {
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleImageChange = (e) => {
-    setFormData({ ...formData, images: Array.from(e.target.files) });
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = () => {
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const files = Array.from(e.dataTransfer.files);
+    setFormData((prev) => ({
+      ...prev,
+      images: [...prev.images, ...files],
+    }));
+  };
+
+  const handleImageUpload = (e) => {
+    const files = Array.from(e.target.files);
+    setFormData((prev) => ({
+      ...prev,
+      images: [...prev.images, ...files],
+    }));
+  };
+
+  const handleRemoveImage = (index) => {
+    setFormData((prev) => ({
+      ...prev,
+      images: prev.images.filter((_, i) => i !== index),
+    }));
   };
 
   const handleUpdateSubmit = async (e) => {
@@ -132,17 +165,17 @@ const List = () => {
           <p className='text-red-500'>{error}</p>
         ) : (
           <div className='overflow-x-auto'>
-            <table className='min-w-full bg-white border border-gray-200'>
+            <table className='min-w-full bg-white border border-gray-200 text-sm sm:text-base'>
               <thead>
                 <tr>
-                  <th className='px-4 py-2 border'>Image</th>
-                  <th className='px-4 py-2 border'>Name</th>
-                  <th className='px-4 py-2 border'>SKU</th>
-                  <th className='px-4 py-2 border'>Price</th>
-                  <th className='px-4 py-2 border'>Category</th>
-                  <th className='px-4 py-2 border'>Brand</th>
-                  <th className='px-4 py-2 border'>Stock</th>
-                  <th className='px-4 py-2 border'>Actions</th>
+                  <th className='px-2 sm:px-4 py-2 border'>Image</th>
+                  <th className='px-2 sm:px-4 py-2 border'>Name</th>
+                  <th className='px-2 sm:px-4 py-2 border'>SKU</th>
+                  <th className='px-2 sm:px-4 py-2 border'>Price</th>
+                  <th className='px-2 sm:px-4 py-2 border'>Category</th>
+                  <th className='px-2 sm:px-4 py-2 border'>Brand</th>
+                  <th className='px-2 sm:px-4 py-2 border'>Stock</th>
+                  <th className='px-2 sm:px-4 py-2 border'>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -151,7 +184,7 @@ const List = () => {
                     key={product._id}
                     className='hover:bg-gray-100 text-center'
                   >
-                    <td className='px-4 py-2 border flex justify-center'>
+                    <td className='px-2 sm:px-4 py-2 border flex justify-center'>
                       {product.images && product.images.length > 0 ? (
                         <img
                           src={`http://localhost:8000/${product.images[0].replace(
@@ -159,30 +192,38 @@ const List = () => {
                             '/'
                           )}`}
                           alt={product.name}
-                          className='w-16 h-16 object-cover rounded-md'
+                          className='w-12 h-12 sm:w-16 sm:h-16 object-cover rounded-md'
                         />
                       ) : (
                         <span>No Image</span>
                       )}
                     </td>
-                    <td className='px-4 py-2 border'>{product.name}</td>
-                    <td className='px-4 py-2 border'>{product.sku}</td>
-                    <td className='px-4 py-2 border'>{product.price}</td>
-                    <td className='px-4 py-2 border'>{product.category}</td>
-                    <td className='px-4 py-2 border'>{product.brand}</td>
-                    <td className='px-4 py-2 border'>{product.stock}</td>
-                    <td className='px-4 py-2 border'>
+                    <td className='px-2 sm:px-4 py-2 border'>{product.name}</td>
+                    <td className='px-2 sm:px-4 py-2 border'>{product.sku}</td>
+                    <td className='px-2 sm:px-4 py-2 border'>
+                      {product.price}
+                    </td>
+                    <td className='px-2 sm:px-4 py-2 border'>
+                      {product.category}
+                    </td>
+                    <td className='px-2 sm:px-4 py-2 border'>
+                      {product.brand}
+                    </td>
+                    <td className='px-2 sm:px-4 py-2 border'>
+                      {product.stock}
+                    </td>
+                    <td className='px-2 sm:px-4 py-2 border'>
                       <button
-                        className='bg-blue-500 text-white px-2 py-1 rounded-md mr-2'
+                        className='text-blue-500 hover:text-blue-700 mr-2'
                         onClick={() => handleUpdateClick(product)}
                       >
-                        Update
+                        <FiEdit className='inline-block w-5 h-5' />
                       </button>
                       <button
-                        className='bg-red-500 text-white px-2 py-1 rounded-md'
+                        className='text-red-500 hover:text-red-700'
                         onClick={() => handleDelete(product._id)}
                       >
-                        Delete
+                        <FiTrash className='inline-block w-5 h-5' />
                       </button>
                     </td>
                   </tr>
@@ -194,75 +235,79 @@ const List = () => {
 
         {/* Update Modal */}
         {showModal && (
-          <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'>
-            <div className='bg-white p-5 rounded-lg shadow-lg w-1/2'>
+          <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 overflow-y-auto'>
+            <div className='bg-white p-5 rounded-lg shadow-lg w-full max-w-4xl mx-4 sm:w-3/4 md:w-2/3 lg:w-1/2 max-h-screen overflow-y-auto'>
               <h2 className='text-xl font-bold mb-4'>Update Product</h2>
               <form onSubmit={handleUpdateSubmit}>
-                <div className='mb-4'>
-                  <label className='block text-sm font-medium'>Name</label>
-                  <input
-                    type='text'
-                    name='name'
-                    value={formData.name}
-                    onChange={handleInputChange}
-                    className='w-full p-2 border rounded-md'
-                    required
-                  />
-                </div>
-                <div className='mb-4'>
-                  <label className='block text-sm font-medium'>SKU</label>
-                  <input
-                    type='text'
-                    name='sku'
-                    value={formData.sku}
-                    onChange={handleInputChange}
-                    className='w-full p-2 border rounded-md'
-                    required
-                  />
-                </div>
-                <div className='mb-4'>
-                  <label className='block text-sm font-medium'>Price</label>
-                  <input
-                    type='number'
-                    name='price'
-                    value={formData.price}
-                    onChange={handleInputChange}
-                    className='w-full p-2 border rounded-md'
-                    required
-                  />
-                </div>
-                <div className='mb-4'>
-                  <label className='block text-sm font-medium'>Category</label>
-                  <input
-                    type='text'
-                    name='category'
-                    value={formData.category}
-                    onChange={handleInputChange}
-                    className='w-full p-2 border rounded-md'
-                    required
-                  />
-                </div>
-                <div className='mb-4'>
-                  <label className='block text-sm font-medium'>Brand</label>
-                  <input
-                    type='text'
-                    name='brand'
-                    value={formData.brand}
-                    onChange={handleInputChange}
-                    className='w-full p-2 border rounded-md'
-                    required
-                  />
-                </div>
-                <div className='mb-4'>
-                  <label className='block text-sm font-medium'>Stock</label>
-                  <input
-                    type='number'
-                    name='stock'
-                    value={formData.stock}
-                    onChange={handleInputChange}
-                    className='w-full p-2 border rounded-md'
-                    required
-                  />
+                <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
+                  <div className='mb-4'>
+                    <label className='block text-sm font-medium'>Name</label>
+                    <input
+                      type='text'
+                      name='name'
+                      value={formData.name}
+                      onChange={handleInputChange}
+                      className='w-full p-2 border rounded-md'
+                      required
+                    />
+                  </div>
+                  <div className='mb-4'>
+                    <label className='block text-sm font-medium'>SKU</label>
+                    <input
+                      type='text'
+                      name='sku'
+                      value={formData.sku}
+                      onChange={handleInputChange}
+                      className='w-full p-2 border rounded-md'
+                      required
+                    />
+                  </div>
+                  <div className='mb-4'>
+                    <label className='block text-sm font-medium'>Price</label>
+                    <input
+                      type='number'
+                      name='price'
+                      value={formData.price}
+                      onChange={handleInputChange}
+                      className='w-full p-2 border rounded-md'
+                      required
+                    />
+                  </div>
+                  <div className='mb-4'>
+                    <label className='block text-sm font-medium'>
+                      Category
+                    </label>
+                    <input
+                      type='text'
+                      name='category'
+                      value={formData.category}
+                      onChange={handleInputChange}
+                      className='w-full p-2 border rounded-md'
+                      required
+                    />
+                  </div>
+                  <div className='mb-4'>
+                    <label className='block text-sm font-medium'>Brand</label>
+                    <input
+                      type='text'
+                      name='brand'
+                      value={formData.brand}
+                      onChange={handleInputChange}
+                      className='w-full p-2 border rounded-md'
+                      required
+                    />
+                  </div>
+                  <div className='mb-4'>
+                    <label className='block text-sm font-medium'>Stock</label>
+                    <input
+                      type='number'
+                      name='stock'
+                      value={formData.stock}
+                      onChange={handleInputChange}
+                      className='w-full p-2 border rounded-md'
+                      required
+                    />
+                  </div>
                 </div>
                 <div className='mb-4'>
                   <label className='block text-sm font-medium'>
@@ -278,18 +323,80 @@ const List = () => {
                 </div>
                 <div className='mb-4'>
                   <label className='block text-sm font-medium'>Images</label>
-                  <input
-                    type='file'
-                    name='images'
-                    multiple
-                    onChange={handleImageChange}
-                    className='w-full p-2 border rounded-md'
-                  />
+                  <div className='bg-white rounded-lg shadow p-6'>
+                    <h2 className='text-lg font-semibold mb-4'>
+                      Hình ảnh sản phẩm
+                    </h2>
+
+                    <div
+                      className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer ${
+                        isDragging
+                          ? 'border-primary bg-primary'
+                          : 'border-gray-300'
+                      }`}
+                      onDragOver={handleDragOver}
+                      onDragLeave={handleDragLeave}
+                      onDrop={handleDrop}
+                      onClick={() => fileInputRef.current.click()}
+                    >
+                      <input
+                        type='file'
+                        multiple
+                        ref={fileInputRef}
+                        onChange={handleImageUpload}
+                        className='hidden'
+                        accept='image/*'
+                      />
+
+                      <FiCamera className='mx-auto h-12 w-12 text-gray-400' />
+                      <div className='mt-2'>
+                        <span className='text-sm font-medium text-black'>
+                          Nhấp để tải lên
+                        </span>{' '}
+                        <span className='text-sm text-gray-500'>
+                          hoặc kéo và thả
+                        </span>
+                      </div>
+                      <p className='mt-1 text-xs text-gray-500'>
+                        PNG, JPG, GIF tối đa 5MB (Tối đa 5 ảnh)
+                      </p>
+                    </div>
+
+                    {formData.images.length > 0 && (
+                      <div className='mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4'>
+                        {formData.images.map((image, index) => (
+                          <div key={index} className='relative group'>
+                            <div className='aspect-w-1 aspect-h-1 w-full overflow-hidden rounded-lg bg-gray-100'>
+                              <img
+                                src={
+                                  typeof image === 'string'
+                                    ? `http://localhost:8000/${image.replace(
+                                        /\\/g,
+                                        '/'
+                                      )}`
+                                    : URL.createObjectURL(image)
+                                }
+                                alt={`Preview ${index + 1}`}
+                                className='h-full w-full object-cover object-center'
+                              />
+                            </div>
+                            <button
+                              type='button'
+                              onClick={() => handleRemoveImage(index)}
+                              className='absolute -top-2 -right-2 bg-white rounded-full shadow'
+                            >
+                              <FiXCircle className='w-6 h-6 text-red-500' />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
                 <div className='flex justify-end'>
                   <button
                     type='button'
-                    className='bg-gray-500 text-white px-4 py-2 rounded-md mr-2'
+                    className='bg-red-500 text-white px-4 py-2 rounded-md mr-2'
                     onClick={handleCloseModal}
                   >
                     Cancel

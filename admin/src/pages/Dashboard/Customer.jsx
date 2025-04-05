@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import { FiEye, FiTrash } from 'react-icons/fi';
 
 const Customer = () => {
   const [customers, setCustomers] = useState([]);
@@ -66,14 +67,14 @@ const Customer = () => {
           <p className='text-red-500'>{error}</p>
         ) : (
           <div className='overflow-x-auto'>
-            <table className='min-w-full bg-white border border-gray-200'>
+            <table className='min-w-full bg-white border border-gray-200 text-sm sm:text-base'>
               <thead>
                 <tr>
-                  <th className='px-4 py-2 border'>Name</th>
-                  <th className='px-4 py-2 border'>Email</th>
-                  <th className='px-4 py-2 border'>Phone</th>
-                  <th className='px-4 py-2 border'>Address</th>
-                  <th className='px-4 py-2 border'>Actions</th>
+                  <th className='px-2 sm:px-4 py-2 border'>Name</th>
+                  <th className='px-2 sm:px-4 py-2 border'>Email</th>
+                  <th className='px-2 sm:px-4 py-2 border'>Phone</th>
+                  <th className='px-2 sm:px-4 py-2 border'>Address</th>
+                  <th className='px-2 sm:px-4 py-2 border'>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -82,22 +83,30 @@ const Customer = () => {
                     key={customer._id}
                     className='hover:bg-gray-100 text-center'
                   >
-                    <td className='px-4 py-2 border'>{customer.name}</td>
-                    <td className='px-4 py-2 border'>{customer.email}</td>
-                    <td className='px-4 py-2 border'>{customer.phone}</td>
-                    <td className='px-4 py-2 border'>{customer.address}</td>
-                    <td className='px-4 py-2 border'>
+                    <td className='px-2 sm:px-4 py-2 border'>
+                      {customer.name}
+                    </td>
+                    <td className='px-2 sm:px-4 py-2 border'>
+                      {customer.email}
+                    </td>
+                    <td className='px-2 sm:px-4 py-2 border'>
+                      {customer.phone}
+                    </td>
+                    <td className='px-2 sm:px-4 py-2 border'>
+                      {customer.address}
+                    </td>
+                    <td className='px-2 sm:px-4 py-2 border'>
                       <button
-                        className='bg-blue-500 text-white px-2 py-1 rounded-md mr-2'
+                        className='text-blue-500 hover:text-blue-700 mr-2'
                         onClick={() => handleViewCustomer(customer)}
                       >
-                        View
+                        <FiEye className='inline-block w-5 h-5' />
                       </button>
                       <button
-                        className='bg-red-500 text-white px-2 py-1 rounded-md'
+                        className='text-red-500 hover:text-red-700'
                         onClick={() => handleDeleteCustomer(customer._id)}
                       >
-                        Delete
+                        <FiTrash className='inline-block w-5 h-5' />
                       </button>
                     </td>
                   </tr>
@@ -108,8 +117,8 @@ const Customer = () => {
         )}
 
         {showModal && selectedCustomer && (
-          <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'>
-            <div className='bg-white p-5 rounded-lg shadow-lg w-1/2'>
+          <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 overflow-y-auto'>
+            <div className='bg-white p-5 rounded-lg shadow-lg w-full max-w-4xl mx-4 sm:w-3/4 md:w-2/3 lg:w-1/2 max-h-screen overflow-y-auto'>
               <h2 className='text-xl font-bold mb-4'>Customer Details</h2>
               <p>
                 <strong>Name:</strong> {selectedCustomer.name}
@@ -123,9 +132,9 @@ const Customer = () => {
               <p>
                 <strong>Address:</strong> {selectedCustomer.address}
               </p>
-              <div className='flex justify-end mt-4'>
+              <div className='flex flex-col sm:flex-row justify-end mt-4'>
                 <button
-                  className='bg-red-500 text-white px-4 py-2 rounded-md'
+                  className='bg-red-500 text-white px-4 py-2 rounded-md mb-2 sm:mb-0 sm:mr-2'
                   onClick={closeModal}
                 >
                   Close

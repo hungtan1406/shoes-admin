@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import axios from 'axios';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { toast } from 'react-toastify';
-
+import { FiCamera, FiXCircle } from 'react-icons/fi';
 const SHOE_SIZES = [35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46];
 
 const MOCK_CATEGORIES = [
@@ -38,6 +38,9 @@ const AddProductForm = () => {
     SHOE_SIZES.reduce((acc, size) => ({ ...acc, [size]: 0 }), {})
   );
   const [images, setImages] = useState([]);
+  const [previewImages, setPreviewImages] = useState([]);
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef(null);
   const [loading, setLoading] = useState(false);
 
   const handleInputChange = (e) => {
@@ -50,8 +53,34 @@ const AddProductForm = () => {
     setSizeQuantities({ ...sizeQuantities, [size]: parseInt(value, 10) || 0 });
   };
 
-  const handleFileChange = (e) => {
-    setImages(e.target.files);
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = () => {
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const files = Array.from(e.dataTransfer.files);
+    handleImageUpload({ target: { files } });
+  };
+
+  const handleImageUpload = (e) => {
+    const files = Array.from(e.target.files);
+    setPreviewImages((prev) => [
+      ...prev,
+      ...files.map((file) => URL.createObjectURL(file)),
+    ]);
+    setImages((prev) => [...prev, ...files]);
+  };
+
+  const handleRemoveImage = (index) => {
+    setPreviewImages((prev) => prev.filter((_, i) => i !== index));
+    setImages((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async (e) => {
@@ -88,6 +117,7 @@ const AddProductForm = () => {
         SHOE_SIZES.reduce((acc, size) => ({ ...acc, [size]: 0 }), {})
       );
       setImages([]);
+      setPreviewImages([]);
       toast.success('Product added successfully!');
     } catch (error) {
       toast.error(error.response?.data?.message || 'Error adding product');
@@ -207,14 +237,61 @@ const AddProductForm = () => {
               required
             ></textarea>
           </div>
-          <div>
-            <label className='block text-sm font-medium'>Images</label>
-            <input
-              type='file'
-              multiple
-              onChange={handleFileChange}
-              className='w-full mt-1 p-2 border rounded-md'
-            />
+          <div className='bg-white rounded-lg shadow p-6'>
+            <h2 className='text-lg font-semibold mb-4'>Hình ảnh sản phẩm</h2>
+
+            <div
+              className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer ${
+                isDragging ? 'border-primary bg-primary' : 'border-gray-300'
+              }`}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              onClick={() => fileInputRef.current.click()}
+            >
+              <input
+                type='file'
+                multiple
+                ref={fileInputRef}
+                onChange={handleImageUpload}
+                className='hidden'
+                accept='image/*'
+              />
+
+              <FiCamera className='mx-auto h-12 w-12 text-gray-400' />
+              <div className='mt-2'>
+                <span className='text-sm font-medium text-black'>
+                  Nhấp để tải lên
+                </span>{' '}
+                <span className='text-sm text-gray-500'>hoặc kéo và thả</span>
+              </div>
+              <p className='mt-1 text-xs text-gray-500'>
+                PNG, JPG, GIF tối đa 5MB (Tối đa 5 ảnh)
+              </p>
+            </div>
+
+            {previewImages.length > 0 && (
+              <div className='mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4'>
+                {previewImages.map((preview, index) => (
+                  <div key={index} className='relative group'>
+                    <div className='aspect-w-1 aspect-h-1 w-full overflow-hidden rounded-lg bg-gray-100'>
+                      <img
+                        src={preview}
+                        alt={`Preview ${index + 1}`}
+                        className='h-full w-full object-cover object-center'
+                      />
+                    </div>
+                    <button
+                      type='button'
+                      onClick={() => handleRemoveImage(index)}
+                      className='absolute -top-2 -right-2 bg-white rounded-full shadow'
+                    >
+                      <FiXCircle className='w-6 h-6 text-red-500' />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
           <button
             type='submit'

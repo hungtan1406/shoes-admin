@@ -14,7 +14,7 @@ const router = express.Router();
 router.get('/get-all', getAllProducts);
 
 // Get product by ID
-router.get('/products/:id', getProductById);
+router.get('/get-product/:id', getProductById);
 
 // Add a new product
 router.post('/add', upload.array('images', 5), createProduct);
