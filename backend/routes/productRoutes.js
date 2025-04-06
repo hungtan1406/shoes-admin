@@ -20,7 +20,7 @@ router.get('/get-product/:id', getProductById);
 router.post('/add', upload.array('images', 5), createProduct);
 
 // Update product by ID
-router.put('/update/:id', updateProduct);
+router.put('/update/:id', upload.array('images', 5), updateProduct);
 
 // Delete product by ID
 router.delete('/delete/:id', deleteProduct);
