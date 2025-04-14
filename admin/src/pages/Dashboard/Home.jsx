@@ -31,8 +31,6 @@ const Home = () => {
           'http://localhost:8000/api/v1/products/get-all'
         );
 
-        console.log('Products API Response:', productsResponse.data);
-
         // If the response is wrapped in an object, extract the products array
         setMetrics(metricsResponse.data);
         setRecentOrders(ordersResponse.data);

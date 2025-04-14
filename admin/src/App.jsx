@@ -13,6 +13,7 @@ import Home from './pages/Dashboard/Home';
 import SignUp from './pages/Auth/SignUp';
 import UserProvider from './context/UserContext';
 import Customer from './pages/Dashboard/Customer';
+import Reviews from './pages/Dashboard/Reviews';
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
             <Route path='/orders' element={<Orders />} />
             <Route path='/list' element={<List />} />
             <Route path='/customers' element={<Customer />} />
+            <Route path='/reviews' element={<Reviews />} />
           </Routes>
         </Router>
       </UserProvider>

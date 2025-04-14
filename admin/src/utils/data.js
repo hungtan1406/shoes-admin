@@ -6,7 +6,7 @@ import {
   LuLogOut,
   LuContactRound,
 } from 'react-icons/lu';
-
+import { VscPreview } from 'react-icons/vsc';
 export const SIDE_MENU_DATA = [
   {
     id: '01',
@@ -40,6 +40,12 @@ export const SIDE_MENU_DATA = [
   },
   {
     id: '06',
+    label: 'Reviews',
+    icon: VscPreview,
+    path: '/reviews',
+  },
+  {
+    id: '07',
     label: 'Log out',
     icon: LuLogOut,
     path: 'logout',

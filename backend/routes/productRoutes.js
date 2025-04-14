@@ -5,8 +5,13 @@ const {
   createProduct,
   updateProduct,
   deleteProduct,
+  addReview,
+  getReviews,
+  deleteReview,
+  getAllReviews,
 } = require('../controllers/productController');
 const upload = require('../middleware/uploadMiddleware');
+// const { protectCustomer } = require('../middleware/authMiddleware'); // Middleware xác thực khách hàng
 
 const router = express.Router();
 
@@ -24,5 +29,17 @@ router.put('/update/:id', upload.array('images', 5), updateProduct);
 
 // Delete product by ID
 router.delete('/delete/:id', deleteProduct);
+
+// Thêm đánh giá
+router.post('/:id/reviews', addReview);
+
+// Lấy danh sách đánh giá
+router.get('/:id/reviews', getReviews);
+
+// Xóa đánh giá
+router.delete('/:id/reviews/:reviewId', deleteReview);
+
+// Lấy tất cả đánh giá từ tất cả sản phẩm
+router.get('/reviews', getAllReviews);
 
 module.exports = router;

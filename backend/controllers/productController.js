@@ -138,10 +138,140 @@ const deleteProduct = async (req, res) => {
   }
 };
 
+// Add review to product
+const addReview = async (req, res) => {
+  try {
+    const { id } = req.params; // ID sản phẩm
+    const { customer, name, rating, comment } = req.body; // Nhận thông tin từ body
+
+    if (!customer || !name || !rating || !comment) {
+      return res.status(400).json({
+        message: 'All fields are required: customer, name, rating, comment',
+      });
+    }
+
+    // Tìm sản phẩm theo ID
+    const product = await Product.findById(id);
+
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+
+    // Kiểm tra nếu khách hàng đã đánh giá
+    const alreadyReviewed = product.reviews.find(
+      (review) => review.customer.toString() === customer
+    );
+
+    if (alreadyReviewed) {
+      return res
+        .status(400)
+        .json({ message: 'Product already reviewed by this customer' });
+    }
+
+    // Thêm đánh giá mới
+    const review = {
+      customer,
+      name,
+      rating: Number(rating),
+      comment,
+    };
+
+    product.reviews.push(review);
+
+    // Cập nhật đánh giá trung bình
+    product.averageRating =
+      product.reviews.reduce((acc, item) => item.rating + acc, 0) /
+      product.reviews.length;
+
+    await product.save();
+
+    res.status(201).json({ message: 'Review added successfully' });
+  } catch (error) {
+    console.error('Error adding review:', error);
+    res
+      .status(500)
+      .json({ message: 'Error adding review', error: error.message });
+  }
+};
+
+// Get reviews of a product
+const getReviews = async (req, res) => {
+  try {
+    const { id } = req.params; // ID sản phẩm
+
+    const product = await Product.findById(id).select('reviews');
+
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+
+    res.status(200).json(product.reviews);
+  } catch (error) {
+    console.error('Error fetching reviews:', error);
+    res
+      .status(500)
+      .json({ message: 'Error fetching reviews', error: error.message });
+  }
+};
+
+const deleteReview = async (req, res) => {
+  try {
+    const { id, reviewId } = req.params; // ID sản phẩm và ID đánh giá
+
+    const product = await Product.findById(id);
+
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+
+    // Lọc bỏ đánh giá cần xóa
+    product.reviews = product.reviews.filter(
+      (review) => review._id.toString() !== reviewId
+    );
+
+    // Cập nhật đánh giá trung bình
+    product.averageRating =
+      product.reviews.reduce((acc, item) => item.rating + acc, 0) /
+      (product.reviews.length || 1);
+
+    await product.save();
+
+    res.status(200).json({ message: 'Review deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting review:', error);
+    res
+      .status(500)
+      .json({ message: 'Error deleting review', error: error.message });
+  }
+};
+
+const getAllReviews = async (req, res) => {
+  try {
+    const products = await Product.find().select('reviews name _id');
+    const allReviews = products.flatMap((product) =>
+      product.reviews.map((review) => ({
+        productId: product._id, // Thêm productId
+        productName: product.name,
+        ...review.toObject(),
+      }))
+    );
+    res.status(200).json(allReviews);
+  } catch (error) {
+    console.error('Error fetching reviews:', error);
+    res
+      .status(500)
+      .json({ message: 'Error fetching reviews', error: error.message });
+  }
+};
+
 module.exports = {
   getAllProducts,
   getProductById,
   createProduct,
   updateProduct,
   deleteProduct,
+  addReview,
+  getReviews,
+  deleteReview,
+  getAllReviews,
 };
