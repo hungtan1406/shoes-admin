@@ -3,13 +3,14 @@ import DashboardLayout from '../../components/layout/DashboardLayout';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { FiCamera, FiXCircle, FiEdit, FiTrash } from 'react-icons/fi';
-
+import { CiSearch } from 'react-icons/ci';
 const List = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [showModal, setShowModal] = useState(false); // For toggling the modal
-  const [selectedProduct, setSelectedProduct] = useState(null); // For storing the selected product
+  const [searchName, setSearchName] = useState(''); // State cho tìm kiếm tên sản phẩm
+  const [showModal, setShowModal] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
     sku: '',
@@ -154,11 +155,28 @@ const List = () => {
     setSelectedProduct(null);
   };
 
+  const filteredProducts = products.filter((product) =>
+    product.name.toLowerCase().includes(searchName.toLowerCase())
+  );
+
   return (
     <DashboardLayout activeMenu='List Products'>
       <div className='bg-gray-100/80 my-5 p-5 rounded-lg mx-auto'>
-        <h2 className='text-2xl font-bold mb-4'>Product List</h2>
+        <div className='flex justify-between items-center w-full'>
+          <h2 className='text-2xl font-bold mb-4'>Product List</h2>
 
+          {/* Thanh tìm kiếm */}
+          <div className='flex items-center bg-white p-2 mb-4 text-black rounded-lg'>
+            <input
+              type='text'
+              placeholder='Search by product name'
+              value={searchName}
+              onChange={(e) => setSearchName(e.target.value)}
+              className='w-full outline-none bg-transparent'
+            />
+            <CiSearch className='text-xl' />
+          </div>
+        </div>
         {loading ? (
           <p>Loading...</p>
         ) : error ? (
@@ -179,7 +197,7 @@ const List = () => {
                 </tr>
               </thead>
               <tbody>
-                {products.map((product) => (
+                {filteredProducts.map((product) => (
                   <tr
                     key={product._id}
                     className='hover:bg-gray-100 text-center'

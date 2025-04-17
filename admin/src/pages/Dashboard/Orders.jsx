@@ -3,6 +3,7 @@ import DashboardLayout from '../../components/layout/DashboardLayout';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { FiEye, FiTrash } from 'react-icons/fi';
+import { CiSearch } from 'react-icons/ci';
 
 const Orders = () => {
   const [orders, setOrders] = useState([]);
@@ -11,6 +12,8 @@ const Orders = () => {
   const [showModal, setShowModal] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [status, setStatus] = useState('');
+  const [searchEmail, setSearchEmail] = useState(''); // State cho tìm kiếm email
+  const [sortOrder, setSortOrder] = useState('asc'); // State cho chế độ sắp xếp
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -77,10 +80,77 @@ const Orders = () => {
     }
   };
 
+  // Hàm chuẩn hóa giá trị tiền tệ
+  const normalizeAmount = (value) => {
+    if (!value) return 0; // Trả về 0 nếu giá trị không tồn tại
+    return parseInt(value.replace(/[^\d]/g, ''), 10); // Loại bỏ ký tự không phải số
+  };
+
+  // Hàm định dạng giá trị tiền tệ
+  const formatCurrency = (value) => {
+    if (!value || isNaN(value)) {
+      return 'N/A'; // Trả về "N/A" nếu giá trị không hợp lệ
+    }
+    return new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND',
+    }).format(value);
+  };
+
+  // Lọc danh sách đơn hàng dựa trên email
+  const filteredOrders = orders.filter((order) =>
+    order.customer?.email.toLowerCase().includes(searchEmail.toLowerCase())
+  );
+
+  // Hàm sắp xếp danh sách đơn hàng
+  const sortOrders = (orders, order) => {
+    return [...orders].sort((a, b) => {
+      const totalA = normalizeAmount(a.totalAmount);
+      const totalB = normalizeAmount(b.totalAmount);
+
+      if (order === 'asc') {
+        return totalA - totalB; // Sắp xếp tăng dần
+      } else {
+        return totalB - totalA; // Sắp xếp giảm dần
+      }
+    });
+  };
+
+  // Danh sách đơn hàng đã sắp xếp
+  const sortedOrders = sortOrders(filteredOrders, sortOrder);
+
   return (
     <DashboardLayout activeMenu='Orders'>
       <div className='bg-gray-100/80 my-5 p-5 rounded-lg mx-auto'>
-        <h2 className='text-2xl font-bold mb-4'>Orders</h2>
+        <div className='flex justify-between items-center w-full'>
+          <h2 className='text-2xl font-bold mb-4'>Orders</h2>
+
+          <div className='flex gap-2'>
+            {/* Thanh tìm kiếm */}
+            <div className='flex items-center bg-white px-2 py-3 mb-4 text-black rounded-lg'>
+              <input
+                type='text'
+                placeholder='Search by email'
+                value={searchEmail}
+                onChange={(e) => setSearchEmail(e.target.value)}
+                className='w-full outline-none bg-transparent'
+              />
+              <CiSearch className='text-xl' />
+            </div>
+            {/* Select sắp xếp */}
+            <div className='flex justify-end mb-4'>
+              <select
+                value={sortOrder}
+                onChange={(e) => setSortOrder(e.target.value)}
+                className=' text-gray-400 px-3 py-3 rounded-md'
+              >
+                <option value=''>Sort by Total</option>
+                <option value='asc'>Ascending</option>
+                <option value='desc'>Descending</option>
+              </select>
+            </div>
+          </div>
+        </div>
 
         {loading ? (
           <p>Loading...</p>
@@ -100,7 +170,7 @@ const Orders = () => {
                 </tr>
               </thead>
               <tbody>
-                {orders.map((order) => (
+                {sortedOrders.map((order) => (
                   <tr key={order._id} className='hover:bg-gray-100 text-center'>
                     <td className='px-2 sm:px-4 py-2 border'>
                       {order.customer?.name || 'Customer details unavailable'}
@@ -112,7 +182,7 @@ const Orders = () => {
                       {order.customer?.phone || 'N/A'}
                     </td>
                     <td className='px-2 sm:px-4 py-2 border'>
-                      {order.totalAmount}
+                      {formatCurrency(normalizeAmount(order.totalAmount))}
                     </td>
                     <td className='px-2 sm:px-4 py-2 border'>{order.status}</td>
                     <td className='px-2 sm:px-4 py-2 border'>

@@ -3,19 +3,21 @@ import axios from 'axios';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { FiTrash } from 'react-icons/fi';
 import { toast } from 'react-toastify';
+import { CiSearch } from 'react-icons/ci';
+
 const Reviews = () => {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [searchName, setSearchName] = useState(''); // State cho tìm kiếm tên khách hàng
 
   useEffect(() => {
     const fetchReviews = async () => {
       try {
         const response = await axios.get(
           'http://localhost:8000/api/v1/products/reviews'
-        ); // Gọi API
-        console.log('API Response:', response.data); // Log dữ liệu trả về
-        setReviews(Array.isArray(response.data) ? response.data : []); // Đảm bảo reviews là mảng
+        );
+        setReviews(Array.isArray(response.data) ? response.data : []);
         setLoading(false);
       } catch (err) {
         setError(err.message || 'Failed to fetch reviews');
@@ -43,10 +45,29 @@ const Reviews = () => {
     }
   };
 
+  // Lọc danh sách đánh giá dựa trên tên khách hàng
+  const filteredReviews = reviews.filter((review) =>
+    review.name.toLowerCase().includes(searchName.toLowerCase())
+  );
+
   return (
     <DashboardLayout activeMenu='Reviews'>
       <div className='bg-gray-100/80 my-5 p-5 rounded-lg mx-auto'>
-        <h2 className='text-2xl font-bold mb-4'>Product Reviews</h2>
+        <div className='flex justify-between items-center w-full'>
+          <h2 className='text-2xl font-bold mb-4'>Product Reviews</h2>
+
+          {/* Thanh tìm kiếm */}
+          <div className='flex items-center bg-white p-2 mb-4 text-black rounded-lg'>
+            <input
+              type='text'
+              placeholder='Search by customer'
+              value={searchName}
+              onChange={(e) => setSearchName(e.target.value)}
+              className='w-full outline-none bg-transparent'
+            />
+            <CiSearch className='text-xl' />
+          </div>
+        </div>
 
         {loading ? (
           <p>Loading...</p>
@@ -68,7 +89,7 @@ const Reviews = () => {
                 </tr>
               </thead>
               <tbody>
-                {reviews.map((review) => (
+                {filteredReviews.map((review) => (
                   <tr
                     key={review._id}
                     className='hover:bg-gray-100 text-center'

@@ -3,13 +3,14 @@ import DashboardLayout from '../../components/layout/DashboardLayout';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { FiEye, FiTrash } from 'react-icons/fi';
-
+import { CiSearch } from 'react-icons/ci';
 const Customer = () => {
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [searchEmail, setSearchEmail] = useState(''); // State cho tìm kiếm email
 
   useEffect(() => {
     const fetchCustomers = async () => {
@@ -56,10 +57,29 @@ const Customer = () => {
     }
   };
 
+  // Lọc danh sách khách hàng dựa trên email
+  const filteredCustomers = customers.filter((customer) =>
+    customer.email.toLowerCase().includes(searchEmail.toLowerCase())
+  );
+
   return (
     <DashboardLayout activeMenu='Customers'>
       <div className='bg-gray-100/80 my-5 p-5 rounded-lg mx-auto'>
-        <h2 className='text-2xl font-bold mb-4'>Customers</h2>
+        <div className='flex justify-between items-center w-full'>
+          <h2 className='text-2xl font-bold mb-4'>Customers</h2>
+
+          {/* Thanh tìm kiếm */}
+          <div className='flex items-center bg-white p-2 mb-4 text-black rounded-lg'>
+            <input
+              type='text'
+              placeholder='Search by email'
+              value={searchEmail}
+              onChange={(e) => setSearchEmail(e.target.value)}
+              className='w-full outline-none bg-transparent'
+            />
+            <CiSearch className='text-xl' />
+          </div>
+        </div>
 
         {loading ? (
           <p>Loading...</p>
@@ -78,7 +98,7 @@ const Customer = () => {
                 </tr>
               </thead>
               <tbody>
-                {customers.map((customer) => (
+                {filteredCustomers.map((customer) => (
                   <tr
                     key={customer._id}
                     className='hover:bg-gray-100 text-center'
